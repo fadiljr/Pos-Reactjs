@@ -6,90 +6,59 @@ import { useSelector, useDispatch } from "react-redux";
 import { setForm } from "../redux";
 
 const PosComponent = () => {
-  // const PosReducer = useSelector((state) => state);
-  // const dispatch = useDispatch();
+  const PosReducer = useSelector((state) => state.PosReducer);
+  const dispatch = useDispatch();
   const [totaltemp, setTotalTemp] = useState(null);
   const [total, setTotal] = useState(null);
   const [kembali, setKembali] = useState(null);
   const [bonus, setBonus] = useState(null);
   const [kurang, setKurang] = useState(null);
   const [keterangan, setKeterangan] = useState(null);
-  const [pembeli, setPembeli] = useState();
-  const [judul, setJudul] = useState();
-  const [jumlah, setJumlah] = useState();
-  const [harga, setHarga] = useState();
-  const [bayar, setBayar] = useState();
-  const [keteranganKembalian, setKeteranganKembalian] = useState();
-  const [isDone, setIsDone] = useState(false);
-  let tempTotal = null;
-  let tempPengurangan;
-  useEffect(() => {
-    setTotal(null);
-    setKurang(null);
-    setKeteranganKembalian(null);
-    setBonus(null);
-    setKeterangan(null);
-    setKembali(null);
-    tempTotal = jumlah * harga;
-    tempPengurangan = bayar - tempTotal;
-    setTotal(tempTotal);
-    if (tempPengurangan < 0) {
-      setKurang(tempPengurangan * -1);
-      setKeteranganKembalian("0 (Tidak ada kembali)");
-    } else {
-      setKembali(tempPengurangan);
-      setKeteranganKembalian(tempPengurangan);
-    }
 
-    if (tempTotal > 500000) {
+  useEffect(() => {
+    console.log("PosReducer: ", PosReducer);
+    setTotalTemp(PosReducer.form.harga * PosReducer.form.jumlah);
+    setKurang(totaltemp - PosReducer.form.bayar);
+  });
+  
+  const sendData = () => {
+    setTotal(totaltemp);
+    if (totaltemp > PosReducer.form.bayar) {
+      setKembali("Tidak ada kembali");
+    } else if (totaltemp < PosReducer.form.bayar) {
+      setKembali(PosReducer.form.bayar - totaltemp);
+    }
+    if (totaltemp > 500000) {
       setBonus("Keyboard");
-    } else if (tempTotal >= 300000 && tempTotal <= 500000) {
+    } else if (totaltemp >= 300000 && totaltemp <= 500000) {
       setBonus("Mouse");
-    } else if (tempTotal >= 200000 && tempTotal <= 300000) {
+    } else if (totaltemp >= 200000 && totaltemp <= 300000) {
       setBonus("Flashdisk");
     } else {
       setBonus("Tidak dapat bonus");
     }
-    console.log(tempTotal);
-    if (kurang) {
+    if (totaltemp > PosReducer.form.bayar) {
       setKeterangan("Kurang bayar Rp. " + kurang);
-    }
-    if (kembali) {
+    } else if (totaltemp < PosReducer.form.bayar) {
       setKeterangan("Tunggu kembalian");
     }
-
-    setIsDone(false);
-    // settoggle(true);
-  }, [isDone === true]);
-  // console.log('PosReducer', PosReducer);
-  // const sendData = () => {
-  //   console.log("data yang dikirim: ", PosReducer.form);
-  //   setTotal(totaltemp);
-  //   if (totaltemp > PosReducer.form.bayar) {
-  //     setKembali("Tidak ada kembali");
-  //   } else if (totaltemp < PosReducer.form.bayar) {
-  //     setKembali(PosReducer.form.bayar - totaltemp);
-  //   }
-  //   if (totaltemp > 500000) {
-  //     setBonus("Keyboard");
-  //   } else if (totaltemp >= 300000 && totaltemp <= 500000) {
-  //     setBonus("Mouse");
-  //   } else if (totaltemp >= 200000 && totaltemp <= 300000) {
-  //     setBonus("Flashdisk");
-  //   } else {
-  //     setBonus("Tidak dapat bonus");
-  //   }
-  //   if (totaltemp > PosReducer.form.bayar) {
-  //     setKeterangan("Kurang bayar Rp. " + kurang);
-  //   } else if (totaltemp < PosReducer.form.bayar) {
-  //     setKeterangan("Tunggu kembalian");
-  //   }
-  //   console.log("data masuk", totaltemp, kembali, bonus, keterangan);
-  // };
-  // const onInputChange = (value, inputType) => {
-  //   dispatch(setForm(inputType, value));
-  // };
-
+  };
+  const onInputChange = (value, inputType) => {
+    dispatch(setForm(inputType, value));
+  };
+  const reset = () => {
+    onInputChange("", "pembeli");
+    onInputChange("", "judul");
+    onInputChange("", "jumlah");
+    onInputChange("", "harga");
+    onInputChange("", "bayar");
+    setTotal(null);
+    setTotalTemp(null);
+    setKembali(null);
+    setKurang(null);
+    setBonus(null);
+    setKeterangan(null);
+  };
   return (
     <div className="Pos">
       <Container fluid="sm">
@@ -101,8 +70,8 @@ const PosComponent = () => {
             <Form.Control
               type="text"
               placeholder="Pembeli"
-              onChange={(e) => setPembeli(e.target.value)}
-              value={pembeli}
+              onChange={(e) => onInputChange(e.target.value, "pembeli")}
+              value={PosReducer.form.pembeli}
             />
           </Col>
         </Form.Group>
@@ -115,8 +84,8 @@ const PosComponent = () => {
             <Form.Control
               type="text"
               placeholder="Judul Ebook"
-              onChange={(e) => setJudul(e.target.value)}
-              value={judul}
+              onChange={(e) => onInputChange(e.target.value, "judul")}
+              value={PosReducer.form.judul}
             />
           </Col>
         </Form.Group>
@@ -129,8 +98,8 @@ const PosComponent = () => {
             <Form.Control
               type="number"
               min="1"
-              onChange={(e) => setJumlah(e.target.value)}
-              value={jumlah}
+              onChange={(e) => onInputChange(e.target.value, "jumlah")}
+              value={PosReducer.form.jumlah}
             />
           </Col>
         </Form.Group>
@@ -143,8 +112,8 @@ const PosComponent = () => {
             <Form.Control
               type="number"
               min="1"
-              onChange={(e) => setHarga(e.target.value)}
-              value={harga}
+              onChange={(e) => onInputChange(e.target.value, "harga")}
+              value={PosReducer.form.harga}
             />
           </Col>
         </Form.Group>
@@ -157,8 +126,8 @@ const PosComponent = () => {
             <Form.Control
               type="number"
               min="1"
-              onChange={(e) => setBayar(e.target.value)}
-              value={bayar}
+              onChange={(e) => onInputChange(e.target.value, "bayar")}
+              value={PosReducer.form.bayar}
             />
           </Col>
         </Form.Group>
@@ -167,8 +136,10 @@ const PosComponent = () => {
           <Col sm={10}>
             <button
               class="btn btn-primary"
-              style={{ width: 1000 }}
-              onClick={() => setIsDone(true)}
+              style={{ width: 1030 }}
+              onClick={() => {
+                sendData();
+              }}
             >
               Proses
             </button>
@@ -186,7 +157,7 @@ const PosComponent = () => {
             Total Belanja :
           </Form.Label>
           <Col sm={1}>
-            <p>{total? `${total}` : null}</p>
+            <p>{total}</p>
           </Col>
         </Form.Group>
 
@@ -195,7 +166,7 @@ const PosComponent = () => {
             Uang Kembali : Rp.
           </Form.Label>
           <Col sm={1}>
-            <p>{keteranganKembalian ? `${keteranganKembalian}` : null}</p>
+            <p>{kembali}</p>
           </Col>
         </Form.Group>
 
@@ -204,7 +175,7 @@ const PosComponent = () => {
             Bonus :
           </Form.Label>
           <Col sm={1}>
-            <p>{total ? `${bonus}` : null}</p>
+            <p>{bonus}</p>
           </Col>
         </Form.Group>
 
@@ -217,7 +188,32 @@ const PosComponent = () => {
             Keterangan :
           </Form.Label>
           <Col sm={1}>
-            <p>{keterangan ? `${keterangan}` : null}</p>
+            <p>{keterangan}</p>
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="formHorizontalButton">
+          <Col sm={5}>
+            <button
+              class="btn btn-primary"
+              style={{ width: 490 }}
+              onClick={() => {
+                reset();
+              }}
+            >
+              Reset
+            </button>
+          </Col>
+          <Col sm={1}>
+            <button
+              class="btn btn-danger"
+              style={{ width: 490 }}
+              onClick={() => {
+                window.close();
+              }}
+            >
+              Keluar
+            </button>
           </Col>
         </Form.Group>
       </Container>

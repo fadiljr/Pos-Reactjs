@@ -1,6 +1,6 @@
-import PosReducer from "./reducer";
+import reducer from "./reducer";
 import { createStore } from "redux";
 
-const store = createStore(PosReducer);
+const store = createStore(reducer);
 
 export default store;

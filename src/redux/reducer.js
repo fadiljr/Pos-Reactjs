@@ -1,3 +1,4 @@
+import { combineReducers } from "redux";
 
 const initialStatePos = {
   form: {
@@ -22,8 +23,8 @@ const PosReducer = (state = initialStatePos, action) => {
   return state;
 };
 
-// const reducer = combineReducers({
-//   PosReducer,
-// });
+const reducer = combineReducers({
+  PosReducer,
+})
 
-export default PosReducer;
+export default reducer;
